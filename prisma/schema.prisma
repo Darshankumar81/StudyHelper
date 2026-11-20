@@ -1,0 +1,67 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id               String    @id @default(cuid())
+  name             String
+  email            String    @unique
+  passwordHash     String
+  dailyStudyHours  Int       @default(4)
+  subjects         Subject[]
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+}
+
+model Subject {
+  id               String   @id @default(cuid())
+  name             String
+  totalHoursNeeded Float
+  userId           String
+  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  topics           Topic[]
+  exams            Exam[]
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+}
+
+model Topic {
+  id          String   @id @default(cuid())
+  title       String
+  isCompleted Boolean  @default(false)
+  subjectId   String
+  subject     Subject  @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  tasks       Task[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Task {
+  id            String   @id @default(cuid())
+  title         String
+  date          DateTime
+  durationHours Float
+  isCompleted   Boolean  @default(false)
+  topicId       String
+  topic         Topic    @relation(fields: [topicId], references: [id], onDelete: Cascade)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model Exam {
+  id        String   @id @default(cuid())
+  title     String
+  date      DateTime
+  subjectId String
+  subject   Subject  @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
